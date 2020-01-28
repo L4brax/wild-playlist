@@ -95,7 +95,6 @@ router.get("/:id/tracks", function(req, res) {
       "SELECT a.name, a.author, a.added_date FROM track a LEFT JOIN playlist_track b ON a.track_id=b.track_id WHERE b.playlist_id = ?";
     db.query(sql, param, (err, result) => {
       if (err) {
-        console.log(err);
         res.json({ status: 500, error: "Erreur interne." });
       } else {
         res.json({ status: 200, error: null, response: result });
