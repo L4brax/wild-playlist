@@ -2,13 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("./../db");
 
-const getDateString = () => {
-  var d = new Date();
-  var curr_date = d.getDate();
-  var curr_month = d.getMonth() + 1; //Months are zero based
-  var curr_year = d.getFullYear();
-  return curr_year + "-" + curr_month + "-" + curr_date;
-};
+const getDateString = require("./../utils");
 
 // Create new playlist
 router.put("/", function(req, res) {
@@ -23,7 +17,7 @@ router.put("/", function(req, res) {
       if (err) {
         res.json({ status: 500, error: "Erreur interne." });
       } else {
-        res.json(JSON.stringify({ status: 201, error: null, response: param }));
+        res.json({ status: 201, error: null, response: param });
       }
     });
   } else {
@@ -54,6 +48,63 @@ router.get("/:id", function(req, res) {
     res.json({
       status: 400,
       error: "Required id parameter missing."
+    });
+  }
+});
+
+// Create new playlist
+router.put("/:id/tracks", function(req, res) {
+  if (req.body.name && req.body.author) {
+    let param = {
+      name: req.body.name,
+      author: req.body.author,
+      added_date: getDateString()
+    };
+    let sql1 = "INSERT INTO track SET ?";
+    let sql2 = "INSERT INTO playlist_track SET ?";
+    db.query(sql1, param, (err1, result1) => {
+      if (err1) {
+        res.json({ status: 500, error: "Erreur interne." });
+      } else {
+        db.query(
+          sql2,
+          { playlist_id: req.params.id, track_id: result1.insertId },
+          err2 => {
+            if (err2) {
+              res.json({ status: 500, error: "Erreur interne." });
+            } else {
+              res.json({ status: 201, error: null, response: param });
+            }
+          }
+        );
+      }
+    });
+  } else {
+    res.json({
+      status: 400,
+      error: "Required data missing in the request body."
+    });
+  }
+});
+
+// Get tracks from a playlist
+router.get("/:id/tracks", function(req, res) {
+  if (req.params.id) {
+    let param = req.params.id;
+    let sql =
+      "SELECT a.name, a.author, a.added_date FROM track a LEFT JOIN playlist_track b ON a.track_id=b.track_id WHERE b.playlist_id = ?";
+    db.query(sql, param, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.json({ status: 500, error: "Erreur interne." });
+      } else {
+        res.json({ status: 200, error: null, response: result });
+      }
+    });
+  } else {
+    res.json({
+      status: 400,
+      error: "Required data missing in the request body."
     });
   }
 });
