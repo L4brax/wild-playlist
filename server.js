@@ -1,11 +1,16 @@
 const express = require("express");
+require("dotenv").config();
+
+//Database connection
 const sql = require("./db.js");
 
 const app = express();
 const port = 80;
 
 // Retreiving routes
-let playlists = require("./routes/playlists");
+var playlists = require("./routes/playlists");
+
+app.use("/", playlists);
 
 sql.query("Select * from playlist", function(err, res) {
   if (err) {

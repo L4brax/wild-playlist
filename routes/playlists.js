@@ -3,3 +3,5 @@ const router = express.Router();
 
 // Create new playlist
 router.put("/", function(req, res) {});
+
+module.exports = router;
