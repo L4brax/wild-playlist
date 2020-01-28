@@ -109,4 +109,31 @@ router.get("/:id/tracks", function(req, res) {
   }
 });
 
+// Delete a playlist
+router.delete("/:id", function(req, res) {
+  if (req.params.id) {
+    let param = req.params.id;
+    let sql1 = "DELETE FROM playlist WHERE playlist_id = ?";
+    let sql2 = "DELETE FROM playlist_track WHERE playlist_id = ?";
+    db.query(sql1, param, err1 => {
+      if (err1) {
+        res.json({ status: 500, error: "Erreur interne." });
+      } else {
+        db.query(sql2, param, err2 => {
+          if (err2) {
+            res.json({ status: 500, error: "Erreur interne." });
+          } else {
+            res.json({ status: 200, error: null });
+          }
+        });
+      }
+    });
+  } else {
+    res.json({
+      status: 400,
+      error: "Required data missing in the request body."
+    });
+  }
+});
+
 module.exports = router;
